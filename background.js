@@ -1,33 +1,24 @@
-async function checkStatus(){
+console.log("SECURITY V2 LOADED");
 
-try{
+async function checkStatus() {
+  try {
+    const res = await fetch(
+      "https://raw.githubusercontent.com/debapon8-cloud/my-extension-control/main/status.json?x=" + Date.now()
+    );
 
-const res=await fetch(
-"https://raw.githubusercontent.com/debapon8-cloud/my-extension-control/main/status.json"
-);
+    const data = await res.json();
 
-const data=await res.json();
+    await chrome.storage.local.set({
+      enabled: data.enabled
+    });
 
-await chrome.storage.local.set({
-enabled:data.enabled
-});
+    console.log("Enabled =", data.enabled);
 
-console.log(
-"Status:",
-data.enabled
-);
-
-}catch(e){
-
-console.log(e);
-
-}
-
+  } catch(e) {
+    console.log("ERROR:", e);
+  }
 }
 
 checkStatus();
 
-setInterval(
-checkStatus,
-10000
-);
+setInterval(checkStatus,3000);
