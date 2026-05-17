@@ -45,7 +45,23 @@ x.sessionId!==myId
 
 while(true){
 
+let state=
+await chrome.storage.local.get([
+"enabled"
+]);
+
+if(state.enabled===false){
+
+console.log(
+"Remote disabled"
+);
+
+return;
+
+}
+
 if(await stopped()){
+console.log("Stopped");
 return;
 }
 
@@ -96,14 +112,27 @@ email
 input.dispatchEvent(
 new Event(
 "input",
-{bubbles:true}
-));
+{
+bubbles:true
+}));
+
+input.dispatchEvent(
+new Event(
+"change",
+{
+bubbles:true
+}));
 
 }
 
 await sleep(2500);
 
-let btn=
+if(await stopped()){
+return;
+}
+
+let confirmBtn=
+
 document.querySelector(
 '[data-testid="baseform-submit-button"]'
 )
@@ -113,30 +142,98 @@ document.querySelector(
 [...document.querySelectorAll(
 "button"
 )]
+.find(btn=>
 
-.find(x=>
-
-x.innerText
+btn.innerText
 ?.toLowerCase()
 .includes("confirm")
 
 ||
 
-x.innerText
+btn.innerText
 ?.toLowerCase()
 .includes("register")
 
+||
+
+btn.innerText
+?.toLowerCase()
+.includes("join")
+
 );
 
-if(btn){
+if(confirmBtn){
 
-btn.click();
+confirmBtn
+.scrollIntoView({
+block:"center"
+});
+
+await sleep(500);
+
+confirmBtn.click();
+
+console.log(
+"confirm clicked"
+);
+
+}
+
+let d=
+Number(
+data.delay
+)||5000;
+
+for(
+let i=0;
+i<d/500;
+i++
+){
+
+let check=
+await chrome.storage.local.get([
+"enabled"
+]);
+
+if(
+check.enabled===false
+){
+return;
+}
+
+if(await stopped()){
+return;
+}
+
+await sleep(500);
+
+}
+
+let add=
+
+[...document.querySelectorAll(
+"button"
+)]
+
+.find(x=>
+
+x.textContent
+?.includes(
+"Add a new registrant"
+)
+
+);
+
+if(add){
+
+add.click();
 
 emails.shift();
 
 await chrome.storage.local.set({
 
 emails,
+
 sentCount:
 (data.sentCount||0)+1
 
@@ -144,9 +241,7 @@ sentCount:
 
 }
 
-await sleep(
-Number(data.delay)||5000
-);
+await sleep(1000);
 
 }
 
