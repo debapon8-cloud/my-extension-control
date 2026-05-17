@@ -1,3 +1,4 @@
+console.log("NEW SECURITY LOADED");
 (async()=>{
 
 const s=await chrome.storage.local.get([
